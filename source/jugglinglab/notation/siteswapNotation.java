@@ -1,4 +1,4 @@
-// siteswapNotation.java
+// SiteswapNotation.java
 //
 // Copyright 2018 by Jack Boyce (jboyce@gmail.com) and others
 
@@ -28,7 +28,7 @@ import jugglinglab.jml.*;
 import jugglinglab.util.*;
 
 
-public class siteswapNotation extends mhnNotation {
+public class SiteswapNotation extends MHNNotation {
     public String getName() {
         return "Siteswap";
     }
@@ -37,7 +37,7 @@ public class siteswapNotation extends mhnNotation {
 
         // This entire method will need to be double-checked for suitability with siteswap2 notation
 
-        siteswapPattern p = new siteswapPattern();
+        SiteswapPattern p = new SiteswapPattern();
 
         // delete newlines and carriage returns from string
         int pos;

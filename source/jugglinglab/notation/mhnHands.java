@@ -1,4 +1,4 @@
-// mhnHands.java
+// MHNHands.java
 //
 // Copyright 2018 by Jack Boyce (jboyce@gmail.com) and others
 
@@ -28,7 +28,7 @@ import java.text.MessageFormat;
 import jugglinglab.util.*;
 
 
-public class mhnHands {
+public class MHNHands {
     static final ResourceBundle guistrings = jugglinglab.JugglingLab.guistrings;
     static final ResourceBundle errorstrings = jugglinglab.JugglingLab.errorstrings;
 
@@ -39,7 +39,7 @@ public class mhnHands {
     protected double[][][][] handpath = null;
 
 
-    public mhnHands(String hands) throws JuggleExceptionUser, JuggleExceptionInternal {
+    public MHNHands(String hands) throws JuggleExceptionUser, JuggleExceptionInternal {
         // delete the '<' and '>' characters first
         int pos;
         while ((pos = hands.indexOf('<')) >= 0) {

@@ -1,4 +1,4 @@
-// mhnNotation.java
+// MHNNotation.java
 //
 // Copyright 2018 by Jack Boyce (jboyce@gmail.com) and others
 
@@ -30,17 +30,23 @@ import jugglinglab.core.*;
 import jugglinglab.util.*;
 import jugglinglab.jml.*;
 
+/*
+This class describes Multi-Hand Notation (MHN), a generalized siteswap-like
+notation invented by Ed Carstens. In MHN a pattern consists of a matrix with
+number of rows equal to the number of hands (potentially belonging to many
+jugglers), and the columns is the number of time beats until the pattern
+repeats. Each cell in the matrix is occupied by zero or more throws that
+specify how many time beats an object is in the air and its destination hand.
 
-public class mhnNotation extends Notation {
-    public String getName() { return "MHN"; }
+This class is abstract since we haven't implemented a way to parse MHN
+patterns from a string representation. It is used as a base class for
+Siteswap notation which does have a parser.
+*/
 
 
-    public JMLPattern getJMLPattern(String config) throws JuggleExceptionUser, JuggleExceptionInternal {
-        return null;    // only implemented for siteswapNotation
-    }
+public abstract class MHNNotation extends Notation {
 
-
-    protected static JMLPattern getJML(mhnPattern p) throws JuggleExceptionUser, JuggleExceptionInternal {
+    protected static JMLPattern getJML(MHNPattern p) throws JuggleExceptionUser, JuggleExceptionInternal {
         findMasterThrows(p);
         assignPaths(p);
         findThrowSources(p);
@@ -50,13 +56,13 @@ public class mhnNotation extends Notation {
     }
 
 
-    protected static void findMasterThrows(mhnPattern p) throws JuggleExceptionInternal {
+    protected static void findMasterThrows(MHNPattern p) throws JuggleExceptionInternal {
         // start by making every throw a master throw
         for (int i = 0; i < p.indexes; i++) {
             for (int j = 0; j < p.numjugglers; j++) {
                 for (int h = 0; h < 2; h++) {
                     for (int slot = 0; slot < p.max_occupancy; slot++) {
-                        mhnThrow mhnt = p.th[j][h][i][slot];
+                        MHNThrow mhnt = p.th[j][h][i][slot];
                         if (mhnt != null) {
                             mhnt.master = mhnt;
                             mhnt.source = null;
@@ -71,7 +77,7 @@ public class mhnNotation extends Notation {
             changed = false;
 
             for (int s = 0; s < p.getNumberOfSymmetries(); s++) {
-                mhnSymmetry sym = p.getSymmetry(s);
+                MHNSymmetry sym = p.getSymmetry(s);
                 Permutation jperm = sym.getJugglerPerm();
                 int delay = sym.getDelay();
 
@@ -83,7 +89,7 @@ public class mhnNotation extends Notation {
                     for (int j = 0; j < p.numjugglers; j++) {
                         for (int h = 0; h < 2; h++) {
                             for (int slot = 0; slot < p.max_occupancy; slot++) {
-                                mhnThrow mhnt = p.th[j][h][i][slot];
+                                MHNThrow mhnt = p.th[j][h][i][slot];
                                 if (mhnt == null)
                                     continue;
 
@@ -91,18 +97,18 @@ public class mhnNotation extends Notation {
                                 int imageh = ((imagej > 0) ? h : 1-h);
                                 imagej = Math.abs(imagej) - 1;
 
-                                mhnThrow imaget = p.th[imagej][imageh][imagei][slot];
+                                MHNThrow imaget = p.th[imagej][imageh][imagei][slot];
                                 if (imaget == null)
                                     throw new JuggleExceptionInternal("Problem finding master throws");
 
-                                mhnThrow m = mhnt.master;
-                                mhnThrow im = imaget.master;
+                                MHNThrow m = mhnt.master;
+                                MHNThrow im = imaget.master;
                                 if (m == im)
                                     continue;
 
                                 // we have a disagreement about which is the master;
                                 // choose one of them and set them equal
-                                mhnThrow newm = m;
+                                MHNThrow newm = m;
                                 if (m.index > im.index)
                                     newm = im;
                                 else if (m.index == im.index) {
@@ -127,8 +133,8 @@ public class mhnNotation extends Notation {
                 for (int j = 0; j < p.numjugglers; j++) {
                     for (int h = 0; h < 2; h++) {
                         for (int slot = 0; slot < p.max_occupancy; slot++) {
-                            mhnThrow mhnt = p.th[j][h][i][slot];
-                            if ((mhnt != null) && (mhnt.master == mhnt))
+                            MHNThrow mhnt = p.th[j][h][i][slot];
+                            if (mhnt != null && mhnt.master == mhnt)
                                 System.out.println("master throw at j="+j+",h="+h+",i="+i+",slot="+slot);
                         }
                     }
@@ -138,7 +144,7 @@ public class mhnNotation extends Notation {
     }
 
 
-    protected static void assignPaths(mhnPattern p) throws JuggleExceptionUser, JuggleExceptionInternal {
+    protected static void assignPaths(MHNPattern p) throws JuggleExceptionUser, JuggleExceptionInternal {
         // first figure out how the throws are filling other throws;
         // this is complicated by the fact that we allow multiplexing
         for (int i = 0; i < p.indexes; i++) {
@@ -146,7 +152,7 @@ public class mhnNotation extends Notation {
                 for (int h = 0; h < 2; h++) {
                     for (int slot = 0; slot < p.max_occupancy; slot++) {
 
-                        mhnThrow sst = p.th[j][h][i][slot];
+                        MHNThrow sst = p.th[j][h][i][slot];
                         if ((sst == null) || (sst.master != sst))   // loop over master throws
                             continue;
 
@@ -159,12 +165,12 @@ public class mhnNotation extends Notation {
                                 for (int j2 = 0; j2 < p.numjugglers; j2++) {
                                     for (int h2 = 0; h2 < 2; h2++) {
                                         for (int slot2 = 0; slot2 < p.max_occupancy; slot2++) {
-                                            mhnThrow sst2 = p.th[j2][h2][i2][slot2];
-                                            if ((sst2 == null) || (sst2.master != sst))
+                                            MHNThrow sst2 = p.th[j2][h2][i2][slot2];
+                                            if (sst2 == null || sst2.master != sst)
                                                 continue;
                                             if (sst2.targetindex >= p.indexes)
                                                 continue;
-                                            mhnThrow target = p.th[sst2.targetjuggler-1][sst2.targethand][sst2.targetindex][targetslot];
+                                            MHNThrow target = p.th[sst2.targetjuggler-1][sst2.targethand][sst2.targetindex][targetslot];
                                             if (target == null)
                                                 itworks = false;
                                             else
@@ -185,12 +191,12 @@ public class mhnNotation extends Notation {
                             for (int j2 = 0; j2 < p.numjugglers; j2++) {
                                 for (int h2 = 0; h2 < 2; h2++) {
                                     for (int slot2 = 0; slot2 < p.max_occupancy; slot2++) {
-                                        mhnThrow sst2 = p.th[j2][h2][i2][slot2];
-                                        if ((sst2 == null) || (sst2.master != sst))
+                                        MHNThrow sst2 = p.th[j2][h2][i2][slot2];
+                                        if (sst2 == null || sst2.master != sst)
                                             continue;
                                         if (sst2.targetindex >= p.indexes)
                                             continue;
-                                        mhnThrow target2 = p.th[sst2.targetjuggler-1][sst2.targethand][sst2.targetindex][targetslot];
+                                        MHNThrow target2 = p.th[sst2.targetjuggler-1][sst2.targethand][sst2.targetindex][targetslot];
                                         if (target2 == null)
                                             throw new JuggleExceptionInternal("Got null target in assignPaths()");
 
@@ -213,9 +219,9 @@ public class mhnNotation extends Notation {
             for (int j = 0; j < p.numjugglers; j++) {
                 for (int h = 0; h < 2; h++) {
                     for (int slot = 0; slot < p.max_occupancy; slot++) {
-                        mhnThrow sst = p.th[j][h][i][slot];
+                        MHNThrow sst = p.th[j][h][i][slot];
                         if (sst != null) {
-                            mhnThrow filler = sst.source;
+                            MHNThrow filler = sst.source;
                             if (filler == null) {
                                 if (currentpath > p.numpaths) {
 
@@ -225,7 +231,7 @@ public class mhnNotation extends Notation {
                                         for (int tempi = 0; tempi <= i; tempi++) {
                                             for (int temph = 0; temph < 2; temph++) {
                                                 for (int tempslot = 0; tempslot < p.max_occupancy; tempslot++) {
-                                                    mhnThrow tempsst = p.th[0][temph][tempi][tempslot];
+                                                    MHNThrow tempsst = p.th[0][temph][tempi][tempslot];
                                                     System.out.println("index="+tempi+", hand="+temph+", slot="+tempslot+":");
                                                     if (tempsst == null)
                                                         System.out.println("   null entry");
@@ -254,24 +260,24 @@ public class mhnNotation extends Notation {
     }
 
 
-    // set the mhnThrow.source field
-    protected static void findThrowSources(mhnPattern p) throws JuggleExceptionInternal {
+    // set the MHNThrow.source field
+    protected static void findThrowSources(MHNPattern p) throws JuggleExceptionInternal {
         for (int i = p.indexes-1; i >= 0; i--) {
             for (int j = 0; j < p.numjugglers; j++) {
                 for (int h = 0; h < 2; h++) {
                     for (int slot = 0; slot < p.max_occupancy; slot++) {
 
-                        mhnThrow sst = p.th[j][h][i][slot];
+                        MHNThrow sst = p.th[j][h][i][slot];
                         if (sst == null)
                             continue;
 
                         if (sst.source == null) {
                             if ((i + p.getPeriod()) < p.indexes) {
-                                mhnThrow sst2 = p.th[j][h][i+p.getPeriod()][slot].source;
+                                MHNThrow sst2 = p.th[j][h][i+p.getPeriod()][slot].source;
                                 if (sst2 == null)
                                     throw new JuggleExceptionInternal("Could not get throw source 1");
 
-                                mhnThrow sst3 = new mhnThrow();
+                                MHNThrow sst3 = new MHNThrow();
                                 sst3.juggler = sst2.juggler;
                                 sst3.hand = sst2.hand;
                                 sst3.index = sst2.index - p.getPeriod();
@@ -304,7 +310,7 @@ public class mhnNotation extends Notation {
     // The following implementation isn't ideal; we would like a function that is
     // invariant with respect to the various pattern symmetries we can apply, but
     // I don't think this is possible with respect to the jugglers.
-    protected static boolean isCatchOrderIncorrect(mhnThrow t1, mhnThrow t2) {
+    protected static boolean isCatchOrderIncorrect(MHNThrow t1, MHNThrow t2) {
         // first look at the time spent in the air; catch higher throws first
         if (t1.source.index > t2.source.index)
             return true;
@@ -330,9 +336,9 @@ public class mhnNotation extends Notation {
         return false;
     }
 
-    // set the mhnThrow.catching and mhnThrow.catchnum fields
-    protected static void setCatchOrder(mhnPattern p) throws JuggleExceptionInternal {
-        mhnThrow[][][][] th = p.getThrows();
+    // set the MHNThrow.catching and MHNThrow.catchnum fields
+    protected static void setCatchOrder(MHNPattern p) throws JuggleExceptionInternal {
+        MHNThrow[][][][] th = p.getThrows();
 
         // figure out the correct catch order for master throws only...
         for (int k = 0; k < p.getIndexes(); k++) {
@@ -341,7 +347,7 @@ public class mhnNotation extends Notation {
                     int slotcatches = 0;
 
                     for (int slot = 0; slot < p.getMaxOccupancy(); slot++) {
-                        mhnThrow sst = th[j][h][k][slot];
+                        MHNThrow sst = th[j][h][k][slot];
                         if (sst == null)
                             break;
 
@@ -356,7 +362,7 @@ public class mhnNotation extends Notation {
                         continue;
 
                     for (int slot1 = 0; slot1 < p.getMaxOccupancy(); slot1++) {
-                        mhnThrow sst1 = th[j][h][k][slot1];
+                        MHNThrow sst1 = th[j][h][k][slot1];
                         if (sst1 == null)
                             break;
                         if (sst1.master != sst1)    // only master throws
@@ -364,7 +370,7 @@ public class mhnNotation extends Notation {
 
                         if (sst1.catching) {
                             for (int slot2 = (slot1+1); slot2 < p.getMaxOccupancy(); slot2++) {
-                                mhnThrow sst2 = th[j][h][k][slot2];
+                                MHNThrow sst2 = th[j][h][k][slot2];
                                 if (sst2 == null)
                                     break;
                                 if (sst2.master != sst2)
@@ -394,7 +400,7 @@ public class mhnNotation extends Notation {
             for (int j = 0; j < p.getNumberOfJugglers(); j++) {
                 for (int h = 0; h < 2; h++) {
                     for (int slot = 0; slot < p.getMaxOccupancy(); slot++) {
-                        mhnThrow sst = th[j][h][k][slot];
+                        MHNThrow sst = th[j][h][k][slot];
                         if (sst == null)
                             break;
                         if (sst.master == sst)      // skip master throws
@@ -422,7 +428,7 @@ public class mhnNotation extends Notation {
     protected static final double splitcatchfactor = 0.4;
 
 
-    protected static JMLPattern convertPatternToJML(mhnPattern p) throws
+    protected static JMLPattern convertPatternToJML(MHNPattern p) throws
                         JuggleExceptionUser, JuggleExceptionInternal {
         JMLPattern result = new JMLPattern();
 
@@ -440,7 +446,7 @@ public class mhnNotation extends Notation {
         int props = (p.color == null) ? 1 : Math.min(balls, p.color.length);
         for (int i = 0; i < props; i++) {
             String mod = null;
-            if (p.propdiam != mhnPattern.propdiam_default)
+            if (p.propdiam != MHNPattern.propdiam_default)
                 mod = "diam="+p.propdiam;
             if (p.color != null) {
                 String colorstr = "color="+p.color[i];
@@ -459,26 +465,26 @@ public class mhnNotation extends Notation {
         // Step 2 -- Add the symmetries to the pattern:
 
         for (int i = 0; i < p.getNumberOfSymmetries(); i++) {
-            mhnSymmetry sss = p.getSymmetry(i);
+            MHNSymmetry sss = p.getSymmetry(i);
             int symtype;
             int[] pathmap = new int[balls+1];
 
             switch (sss.getType()) {
-                case mhnSymmetry.TYPE_DELAY:
+                case MHNSymmetry.TYPE_DELAY:
                     symtype = JMLSymmetry.TYPE_DELAY;
                     // figure out the path mapping
                     {
-                        mhnThrow[][][][] th = p.getThrows();
+                        MHNThrow[][][][] th = p.getThrows();
                         for (int k = 0; k < (p.getIndexes()-sss.getDelay()); k++) {
                             for (int j = 0; j < p.getNumberOfJugglers(); j++) {
                                 for (int h = 0; h < 2; h++) {
                                     for (int slot = 0; slot < p.getMaxOccupancy(); slot++) {
-                                        mhnThrow sst = th[j][h][k][slot];
-                                        if ((sst != null) && (sst.pathnum != -1)) {
-                                            mhnThrow sst2 = th[j][h][k+sss.getDelay()][slot];
+                                        MHNThrow sst = th[j][h][k][slot];
+                                        if (sst != null && sst.pathnum != -1) {
+                                            MHNThrow sst2 = th[j][h][k+sss.getDelay()][slot];
                                             if (sst2 == null)
                                                 throw new JuggleExceptionUser(errorstrings.getString("Error_badpattern_paths"));
-                                            if ((sst.pathnum == 0) || (sst2.pathnum == 0))
+                                            if (sst.pathnum == 0 || sst2.pathnum == 0)
                                                 throw new JuggleExceptionUser(errorstrings.getString("Error_badpattern_paths"));
                                             if (pathmap[sst.pathnum] == 0)
                                                 pathmap[sst.pathnum] = sst2.pathnum;
@@ -491,27 +497,27 @@ public class mhnNotation extends Notation {
                         }
                     }
                         break;
-                case mhnSymmetry.TYPE_SWITCH:
+                case MHNSymmetry.TYPE_SWITCH:
                     symtype = JMLSymmetry.TYPE_SWITCH;
                     break;
-                case mhnSymmetry.TYPE_SWITCHDELAY:
+                case MHNSymmetry.TYPE_SWITCHDELAY:
                     symtype = JMLSymmetry.TYPE_SWITCHDELAY;
 
                     // figure out the path mapping
                     {
                         Permutation jugperm = sss.getJugglerPerm();
 
-                        mhnThrow[][][][] th = p.getThrows();
+                        MHNThrow[][][][] th = p.getThrows();
                         for (int k = 0; k < (p.getIndexes()-sss.getDelay()); k++) {
                             for (int j = 0; j < p.getNumberOfJugglers(); j++) {
                                 for (int h = 0; h < 2; h++) {
                                     for (int slot = 0; slot < p.getMaxOccupancy(); slot++) {
-                                        mhnThrow sst = th[j][h][k][slot];
-                                        if ((sst != null) && (sst.pathnum != -1)) {
+                                        MHNThrow sst = th[j][h][k][slot];
+                                        if (sst != null && sst.pathnum != -1) {
                                             int map = jugperm.getMapping(j+1);
                                             int newj = Math.abs(map)-1;
                                             int newh = ((map > 0) ? h : 1-h);
-                                            mhnThrow sst2 = th[newj][newh][k+sss.getDelay()][slot];
+                                            MHNThrow sst2 = th[newj][newh][k+sss.getDelay()][slot];
                                             if (sst2 == null)
                                                 throw new JuggleExceptionUser(errorstrings.getString("Error_badpattern_paths"));
                                             if ((sst.pathnum == 0) || (sst2.pathnum == 0))
@@ -565,13 +571,13 @@ public class mhnNotation extends Notation {
         for (int j = 0; j < p.getNumberOfPaths(); j++)
             pathtouched[j] = false;
 
-        mhnThrow[][][][] th = p.getThrows();
+        MHNThrow[][][][] th = p.getThrows();
 
         for (int k = 0; k < p.getPeriod(); k++) {
             for (int j = 0; j < p.getNumberOfJugglers(); j++) {
                 for (int h = 0; h < 2; h++) {
 
-                    mhnThrow sst = th[j][h][k][0];
+                    MHNThrow sst = th[j][h][k][0];
                     if (sst == null || sst.master != sst)
                         continue;
 
@@ -583,7 +589,7 @@ public class mhnNotation extends Notation {
                     boolean onethrown = false;
 
                     for (int slot = 0; slot < p.getMaxOccupancy(); slot++) {
-                        mhnThrow sst2 = th[j][h][k][slot];
+                        MHNThrow sst2 = th[j][h][k][slot];
                         if (sst2 == null)
                             continue;
 
@@ -615,12 +621,12 @@ public class mhnNotation extends Notation {
                                     else
                                         mod = mod + ";bounces=" + bounces;
                                 }
-                                if (p.bouncefrac != mhnPattern.bouncefrac_default)
+                                if (p.bouncefrac != MHNPattern.bouncefrac_default)
                                     if (mod == null)
                                         mod = "bouncefrac=" + p.bouncefrac;
                                     else
                                         mod = mod + ";bouncefrac=" + p.bouncefrac;
-                                if (p.gravity != mhnPattern.gravity_default) {
+                                if (p.gravity != MHNPattern.gravity_default) {
                                     if (mod == null)
                                         mod = "g=" + p.gravity;
                                     else
@@ -630,9 +636,9 @@ public class mhnNotation extends Notation {
                             case 'F':
                                 type = "bounce";
                                 mod = "forced=true";
-                                if (p.bouncefrac != mhnPattern.bouncefrac_default)
+                                if (p.bouncefrac != MHNPattern.bouncefrac_default)
                                     mod += ";bouncefrac="+p.bouncefrac;
-                                if (p.gravity != mhnPattern.gravity_default)
+                                if (p.gravity != MHNPattern.gravity_default)
                                     mod = mod + ";g=" + p.gravity;
                                 break;
                             case 'H':
@@ -643,7 +649,7 @@ public class mhnNotation extends Notation {
                             default:
                                 type = "toss";
                                 mod = null;
-                                if (p.gravity != mhnPattern.gravity_default)
+                                if (p.gravity != MHNPattern.gravity_default)
                                     mod = "g=" + p.gravity;
                                 break;
                         }
@@ -677,7 +683,7 @@ public class mhnNotation extends Notation {
                     if (p.hands == null) {
                         if (num_throws > 0) {
                             double throwxav = throwxsum / (double)num_throws;
-                            if (h == mhnPattern.LEFT_HAND)
+                            if (h == MHNPattern.LEFT_HAND)
                                 throwxav = -throwxav;
                             ev.setLocalCoordinate(new Coordinate(throwxav,0.0,0.0));
                             ev.calcpos = false;
@@ -687,7 +693,7 @@ public class mhnNotation extends Notation {
                         }
                     } else {
                         Coordinate c = p.hands.getCoordinate(sst.juggler, sst.handsindex, 0);
-                        if (h == mhnPattern.LEFT_HAND)
+                        if (h == MHNPattern.LEFT_HAND)
                             c.x = -c.x;
                         ev.setLocalCoordinate(c);
                         ev.calcpos = false;
@@ -702,7 +708,7 @@ public class mhnNotation extends Notation {
                     ev.setT(throwtime);
 
                     // set the event juggler and hand
-                    ev.setHand(j+1, (h==mhnPattern.RIGHT_HAND ? HandLink.RIGHT_HAND : HandLink.LEFT_HAND));
+                    ev.setHand(j+1, (h==MHNPattern.RIGHT_HAND ? HandLink.RIGHT_HAND : HandLink.LEFT_HAND));
 
                     // add it to the pattern
                     result.addEvent(ev);
@@ -712,7 +718,7 @@ public class mhnNotation extends Notation {
                         for (int j2 = 0; j2 < p.numjugglers; j2++) {
                             for (int h2 = 0; h2 < 2; h2++) {
                                 for (int slot2 = 0; slot2 < p.max_occupancy; slot2++) {
-                                    mhnThrow sst2 = th[j2][h2][i2][slot2];
+                                    MHNThrow sst2 = th[j2][h2][i2][slot2];
                                     if ((sst2 != null) && (sst2.master == sst))
                                         handtouched[j2][h2] = true;
                                 }
@@ -732,7 +738,7 @@ public class mhnNotation extends Notation {
                     boolean onecaught = false;
 
                     for (int slot = 0; slot < p.getMaxOccupancy(); slot++) {
-                        mhnThrow sst2 = th[j][h][k][slot];
+                        MHNThrow sst2 = th[j][h][k][slot];
                         if (sst2 == null)
                             break;
                         if (!sst2.catching)
@@ -764,7 +770,7 @@ public class mhnNotation extends Notation {
                             if (num_catches > 0) {
                                 double cx = catchxsum / (double)num_catches;
                                 // System.out.println("average catch pos. = "+cx);
-                                ev.setLocalCoordinate(new Coordinate((h==mhnPattern.RIGHT_HAND?cx:-cx),0.0,0.0));
+                                ev.setLocalCoordinate(new Coordinate((h==MHNPattern.RIGHT_HAND?cx:-cx),0.0,0.0));
                                 ev.calcpos = false;
                             } else {
                                 // mark event to calculate coordinate later
@@ -776,7 +782,7 @@ public class mhnNotation extends Notation {
                                 pos += p.hands.getPeriod(sst.juggler);
                             int index = p.hands.getCatchIndex(sst.juggler, pos);
                             Coordinate c = p.hands.getCoordinate(sst.juggler, pos, index);
-                            if (h == mhnPattern.LEFT_HAND)
+                            if (h == MHNPattern.LEFT_HAND)
                                 c.x = -c.x;
                             ev.setLocalCoordinate(c);
                             ev.calcpos = false;
@@ -790,11 +796,11 @@ public class mhnNotation extends Notation {
                         ev.setT(lastcatchtime);
 
                         // set the event juggler and hand
-                        ev.setHand(j+1, (h==mhnPattern.RIGHT_HAND ? HandLink.RIGHT_HAND : HandLink.LEFT_HAND));
+                        ev.setHand(j+1, (h==MHNPattern.RIGHT_HAND ? HandLink.RIGHT_HAND : HandLink.LEFT_HAND));
 
                         // add all the transitions
                         for (int slot = 0; slot < p.getMaxOccupancy(); slot++) {
-                            mhnThrow sst2 = th[j][h][k][slot];
+                            MHNThrow sst2 = th[j][h][k][slot];
                             if (sst2 == null)
                                 break;
 
@@ -814,7 +820,7 @@ public class mhnNotation extends Notation {
                     } else {
                         // Case 2: separate event for each catch; we know that numcatches>1 here
                         for (int slot = 0; slot < p.getMaxOccupancy(); slot++) {
-                            mhnThrow sst2 = th[j][h][k][slot];
+                            MHNThrow sst2 = th[j][h][k][slot];
                             if (sst2 == null)
                                 continue;
 
@@ -827,14 +833,14 @@ public class mhnNotation extends Notation {
                                 if (p.hands == null) {
                                     double cx = catchxsum / (double)num_catches;
                                     // System.out.println("average catch pos. = "+cx);
-                                    ev.setLocalCoordinate(new Coordinate((h==mhnPattern.RIGHT_HAND?cx:-cx),0.0,0.0));
+                                    ev.setLocalCoordinate(new Coordinate((h==MHNPattern.RIGHT_HAND?cx:-cx),0.0,0.0));
                                 } else {
                                     int pos = sst.handsindex - 2;
                                     while (pos < 0)
                                         pos += p.hands.getPeriod(sst.juggler);
                                     int index = p.hands.getCatchIndex(sst.juggler, pos);
                                     Coordinate c = p.hands.getCoordinate(sst.juggler, pos, index);
-                                    if (h == mhnPattern.LEFT_HAND)
+                                    if (h == MHNPattern.LEFT_HAND)
                                         c.x = -c.x;
                                     ev.setLocalCoordinate(c);
                                 }
@@ -854,7 +860,7 @@ public class mhnNotation extends Notation {
                                     lastcatchtime = catchtime;
 
                                 // set the event juggler and hand
-                                ev.setHand(j+1, (h==mhnPattern.RIGHT_HAND ? HandLink.RIGHT_HAND : HandLink.LEFT_HAND));
+                                ev.setHand(j+1, (h==MHNPattern.RIGHT_HAND ? HandLink.RIGHT_HAND : HandLink.LEFT_HAND));
 
                                 // add the transition
                                 ev.addTransition(new JMLTransition(JMLTransition.TRANS_CATCH, sst2.pathnum, null, null));
@@ -884,12 +890,12 @@ public class mhnNotation extends Notation {
                         if (c == null)
                             continue;
                         ev = new JMLEvent();
-                        if (h == mhnPattern.LEFT_HAND)
+                        if (h == MHNPattern.LEFT_HAND)
                             c.x = -c.x;
                         ev.setLocalCoordinate(c);
                         ev.calcpos = false;
                         ev.setT(lastcatchtime + (double)di*(throwtime-lastcatchtime)/numcoords);
-                        ev.setHand(sst.juggler, (h==mhnPattern.RIGHT_HAND?HandLink.RIGHT_HAND:HandLink.LEFT_HAND));
+                        ev.setHand(sst.juggler, (h==MHNPattern.RIGHT_HAND?HandLink.RIGHT_HAND:HandLink.LEFT_HAND));
                         result.addEvent(ev);
                     }
 
@@ -902,7 +908,7 @@ public class mhnNotation extends Notation {
                         boolean next_onecaught = false;
 
                         for (int tempslot = 0; tempslot < p.getMaxOccupancy(); tempslot++) {
-                            mhnThrow tempsst = th[j][h][tempk][tempslot];
+                            MHNThrow tempsst = th[j][h][tempk][tempslot];
                             if (tempsst == null)
                                 break;
 
@@ -942,12 +948,12 @@ public class mhnNotation extends Notation {
                         if (c == null)
                             continue;
                         ev = new JMLEvent();
-                        if (h == mhnPattern.LEFT_HAND)
+                        if (h == MHNPattern.LEFT_HAND)
                             c.x = -c.x;
                         ev.setLocalCoordinate(c);
                         ev.calcpos = false;
                         ev.setT(throwtime + (double)di*(nextcatchtime-throwtime)/numcoords);
-                        ev.setHand(sst.juggler, (h==mhnPattern.RIGHT_HAND?HandLink.RIGHT_HAND:HandLink.LEFT_HAND));
+                        ev.setHand(sst.juggler, (h==MHNPattern.RIGHT_HAND?HandLink.RIGHT_HAND:HandLink.LEFT_HAND));
                         result.addEvent(ev);
                     }
                 }
@@ -974,7 +980,7 @@ public class mhnNotation extends Notation {
             for (int h = 0; h < 2; h++) {
                 if (!handtouched[j][h]) {
                     JMLEvent ev = new JMLEvent();
-                    ev.setLocalCoordinate(new Coordinate((h==mhnPattern.RIGHT_HAND?restingx:-restingx),0.0,0.0));
+                    ev.setLocalCoordinate(new Coordinate((h==MHNPattern.RIGHT_HAND?restingx:-restingx),0.0,0.0));
                     ev.setT(-1.0);
                     ev.setHand(j+1, (h==0?HandLink.RIGHT_HAND:HandLink.LEFT_HAND));
                     ev.calcpos = false;
@@ -1010,9 +1016,9 @@ top:
                 for (int tempj = 0; tempj < p.getNumberOfJugglers(); tempj++) {
                     for (int temph = 0; temph < 2; temph++) {
                         for (int slot = 0; slot < p.getMaxOccupancy(); slot++) {
-                            mhnThrow sst = th[tempj][temph][tempk][slot];
-                            if ((sst != null) && (sst.pathnum == (k+1))) {
-                                hand = (temph==mhnPattern.RIGHT_HAND?HandLink.RIGHT_HAND:HandLink.LEFT_HAND);
+                            MHNThrow sst = th[tempj][temph][tempk][slot];
+                            if (sst != null && sst.pathnum == (k+1)) {
+                                hand = (temph==MHNPattern.RIGHT_HAND?HandLink.RIGHT_HAND:HandLink.LEFT_HAND);
                                 juggler = tempj;
                                 break top;
                             }
@@ -1051,7 +1057,7 @@ top:
 
         for (int j = 1; j <= p.getNumberOfJugglers(); j++) {
             for (int h = 0; h < 2; h++) {
-                int hand = (h==mhnPattern.RIGHT_HAND?HandLink.RIGHT_HAND:HandLink.LEFT_HAND);
+                int hand = (h==MHNPattern.RIGHT_HAND?HandLink.RIGHT_HAND:HandLink.LEFT_HAND);
 
                 JMLEvent ev = result.getEventList();
                 JMLEvent start = null;
@@ -1108,7 +1114,7 @@ top:
                 ev = result.getEventList();
                 while (ev != null) {
                     if ((ev.getJuggler() == j) && (ev.getHand() == hand) && ev.calcpos) {
-                        ev.setLocalCoordinate(new Coordinate((h==mhnPattern.RIGHT_HAND?restingx:-restingx),0.0,0.0));
+                        ev.setLocalCoordinate(new Coordinate((h==MHNPattern.RIGHT_HAND?restingx:-restingx),0.0,0.0));
                         ev.calcpos = false;
                     }
                     ev = ev.getNext();
@@ -1183,17 +1189,17 @@ top:
     protected static final double[] throwspersec =
         { 2.00, 2.00, 2.00, 2.90, 3.40, 4.10, 4.25, 5.00, 5.00, 5.50 };
 
-    protected static double calcBps(mhnPattern p) {
+    protected static double calcBps(MHNPattern p) {
         double result = 0.0;
 
-        mhnThrow[][][][] th = p.getThrows();
+        MHNThrow[][][][] th = p.getThrows();
         int numberaveraged = 0;
 
         for (int k = 0; k < p.getPeriod(); k++) {
             for (int j = 0; j < p.getNumberOfJugglers(); j++) {
                 for (int h = 0; h < 2; h++) {
                     for (int slot = 0; slot < p.getMaxOccupancy(); slot++) {
-                        mhnThrow sst = th[j][h][k][slot];
+                        MHNThrow sst = th[j][h][k][slot];
                         if (sst != null) {
                             int throwval = sst.targetindex - k;
                             if (throwval > 2) {

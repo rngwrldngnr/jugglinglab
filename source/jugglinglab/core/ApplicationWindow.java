@@ -43,7 +43,7 @@ public class ApplicationWindow extends JFrame implements ActionListener {
     public ApplicationWindow(String title) throws JuggleExceptionUser,
                                         JuggleExceptionInternal {
         super(title);
-        NotationGUI ng = new NotationGUI(this);
+        NotationPanel ng = new NotationPanel(this);
 
         JMenuBar mb = new JMenuBar();
         JMenu filemenu = createFileMenu();

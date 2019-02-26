@@ -1,4 +1,4 @@
-// mhnBody.java
+// MHNBody.java
 //
 // Copyright 2018 by Jack Boyce (jboyce@gmail.com) and others
 
@@ -29,7 +29,7 @@ import jugglinglab.jml.*;
 import jugglinglab.util.*;
 
 
-public class mhnBody {
+public class MHNBody {
     static final ResourceBundle guistrings = jugglinglab.JugglingLab.guistrings;
     static final ResourceBundle errorstrings = jugglinglab.JugglingLab.errorstrings;
 
@@ -38,7 +38,7 @@ public class mhnBody {
     protected int[][] coords = null;
     protected double[][][][] bodypath = null;
 
-    public mhnBody(String bodies) throws JuggleExceptionUser, JuggleExceptionInternal {
+    public MHNBody(String bodies) throws JuggleExceptionUser, JuggleExceptionInternal {
         // delete the '<' and '>' characters first
         int pos;
         while ((pos = bodies.indexOf('<')) >= 0) {

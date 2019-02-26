@@ -50,12 +50,12 @@ public abstract class Notation {
         if (hash == null)
             hash = new Hashtable<String, Notation>();
 
-        Notation not = hash.get(name.toLowerCase());
+        Notation not = hash.get(name);
         if (not == null) {
             Notation newnot = null;
             try {
                 Object obj = Class.forName("jugglinglab.notation."+
-                                           name.toLowerCase()+"Notation").newInstance();
+                                           name+"Notation").newInstance();
                 if (!(obj instanceof Notation))
                     throw new JuggleExceptionInternal(errorstrings.getString(
                                         "Error_notation_bad")+": '"+name+"'");
@@ -74,7 +74,7 @@ public abstract class Notation {
                                         "Error_notation_cantcreate")+": '"+name+"'");
             }
 
-            hash.put(name.toLowerCase(), newnot);
+            hash.put(name, newnot);
             return newnot;
         }
         return not;

@@ -1,4 +1,4 @@
-// siteswapNotationControl.java
+// SiteswapNotationControl.java
 //
 // Copyright 2018 by Jack Boyce (jboyce@gmail.com) and others
 
@@ -22,5 +22,5 @@
 
 package jugglinglab.notation;
 
-public class siteswapNotationControl extends mhnNotationControl {
+public class SiteswapNotationControl extends MHNNotationControl {
 }

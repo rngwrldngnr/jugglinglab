@@ -1,6 +1,6 @@
-// mhnNotationControl.java
+// MHNNotationControl.java
 //
-// Copyright 2018 by Jack Boyce (jboyce@gmail.com) and others
+// Copyright 2019 by Jack Boyce (jboyce@gmail.com) and others
 
 /*
     This file is part of Juggling Lab.
@@ -20,6 +20,10 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+// Although MHNNotation is an abstract class, we give MHN a control panel
+// here for Siteswap notation to inherit. These controls should apply to any
+// other MHN-derived notations as well.
+
 package jugglinglab.notation;
 
 import javax.swing.*;
@@ -31,7 +35,8 @@ import java.util.*;
 import jugglinglab.util.*;
 import jugglinglab.prop.Prop;
 
-public class mhnNotationControl extends NotationControl {
+
+public class MHNNotationControl extends NotationControl {
     protected static final String[] builtinHandsNames = {
         "inside",
         "outside",
@@ -70,7 +75,7 @@ public class mhnNotationControl extends NotationControl {
     protected final static int vspacing = 12;
 
 
-    public mhnNotationControl() {
+    public MHNNotationControl() {
         this.setOpaque(false);
         this.setLayout(new BorderLayout());
 
@@ -271,7 +276,7 @@ public class mhnNotationControl extends NotationControl {
         sb.append(tf1.getText());
         sb.append(";prop=" + Prop.builtinProps[cb3.getSelectedIndex()].toLowerCase());
         if (tf2.getText().length() > 0) {
-            if (!tf2.getText().equals(new Double(mhnPattern.dwell_default).toString())) {
+            if (!tf2.getText().equals(new Double(MHNPattern.dwell_default).toString())) {
                 sb.append(";dwell=");
                 sb.append(tf2.getText());
             }
@@ -297,7 +302,7 @@ public class mhnNotationControl extends NotationControl {
 
     public void resetNotationControl() {
         tf1.setText("3");                                               // pattern
-        tf2.setText(new Double(mhnPattern.dwell_default).toString());   // dwell beats
+        tf2.setText(new Double(MHNPattern.dwell_default).toString());   // dwell beats
         tf3.setText("");                                                // beats per second
         tf4.setText("");
         cb1.setSelectedIndex(0);
@@ -309,7 +314,7 @@ public class mhnNotationControl extends NotationControl {
 
     public String getHandsName() {
         int index = cb1.getSelectedIndex();
-        if ((index == 0) || (index == (builtinHandsNames.length+1)))
+        if (index == 0 || index == (builtinHandsNames.length+1))
             return null;
 
         return builtinHandsNames[index-1];

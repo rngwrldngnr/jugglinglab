@@ -1,4 +1,4 @@
-// mhnPattern.java
+// MHNPattern.java
 //
 // Copyright 2018 by Jack Boyce (jboyce@gmail.com) and others
 
@@ -27,7 +27,7 @@ import java.util.*;
 import jugglinglab.util.*;
 
 
-public class mhnPattern {
+public class MHNPattern {
     static final ResourceBundle guistrings = jugglinglab.JugglingLab.guistrings;
     static final ResourceBundle errorstrings = jugglinglab.JugglingLab.errorstrings;
 
@@ -56,12 +56,12 @@ public class mhnPattern {
     protected int numpaths;
     protected int period;
     protected int max_occupancy;
-    protected mhnThrow[][][][] th;
-    protected mhnHands hands;
-    protected mhnBody bodies;
+    protected MHNThrow[][][][] th;
+    protected MHNHands hands;
+    protected MHNBody bodies;
     protected int max_throw;
     protected int indexes;
-    protected ArrayList<mhnSymmetry> symmetry;
+    protected ArrayList<MHNSymmetry> symmetry;
 
     public static final int RIGHT_HAND = 0;
     public static final int LEFT_HAND = 1;
@@ -72,11 +72,11 @@ public class mhnPattern {
     protected int getIndexes()                  { return indexes; }
     protected int getMaxOccupancy()             { return max_occupancy; }
     protected int getMaxThrow()                 { return max_throw; }
-    protected mhnThrow[][][][] getThrows()      { return th; }
+    protected MHNThrow[][][][] getThrows()      { return th; }
     protected int getNumberOfSymmetries()       { return symmetry.size(); }
     protected String getPropName()              { return prop; }
-    protected void addSymmetry(mhnSymmetry ss)  { symmetry.add(ss); }
-    protected mhnSymmetry getSymmetry(int i)    { return symmetry.get(i); }
+    protected void addSymmetry(MHNSymmetry ss)  { symmetry.add(ss); }
+    protected MHNSymmetry getSymmetry(int i)    { return symmetry.get(i); }
 
 
     public void parseInput(String config) throws JuggleExceptionUser, JuggleExceptionInternal {
@@ -108,10 +108,10 @@ public class mhnPattern {
         }
 
         if ((temp = pl.getParameter("hands")) != null)
-            hands = new mhnHands(temp);
+            hands = new MHNHands(temp);
 
         if ((temp = pl.getParameter("body")) != null)
-            bodies = new mhnBody(temp);
+            bodies = new MHNBody(temp);
 
         if ((temp = pl.getParameter("gravity")) != null) {
             try {

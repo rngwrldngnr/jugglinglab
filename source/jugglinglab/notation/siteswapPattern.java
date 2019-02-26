@@ -1,4 +1,4 @@
-// siteswapPattern.java
+// SiteswapPattern.java
 //
 // Copyright 2018 by Jack Boyce (jboyce@gmail.com) and others
 
@@ -27,8 +27,7 @@ import java.text.*;
 import jugglinglab.util.*;
 
 
-public class siteswapPattern extends mhnPattern {
-    protected String config = null;
+public class SiteswapPattern extends MHNPattern {
     protected boolean oddperiod = false;
 
     // only works after parsePattern() is called:
@@ -40,8 +39,6 @@ public class siteswapPattern extends mhnPattern {
     public void parseInput(String config) throws JuggleExceptionUser, JuggleExceptionInternal {
         super.parseInput(config);       // parse params common to all MHN notations
         // parseLegacyParameters(config);   // parse legacy JuggleAnim params
-
-        this.config = config;
     }
 
     @Override
@@ -157,7 +154,7 @@ public class siteswapPattern extends mhnPattern {
         }
 
         if ((hands == null) && gotthrowcatch) { // not created by hands parameter
-            hands = new mhnHands("("+(100.0*rightthrowx)+")("+(100.0*rightcatchx)+").("+
+            hands = new MHNHands("("+(100.0*rightthrowx)+")("+(100.0*rightcatchx)+").("+
                                  (100.0*leftthrowx)+")("+(100.0*leftcatchx)+").");
         }
     }
@@ -166,7 +163,7 @@ public class siteswapPattern extends mhnPattern {
     public void parsePattern() throws JuggleExceptionUser, JuggleExceptionInternal {
         // first clear out the internal variables
         th = null;
-        symmetry = new ArrayList<mhnSymmetry>();
+        symmetry = new ArrayList<MHNSymmetry>();
 
         SiteswapTreeItem tree = null;   // should probably be class variable
 
@@ -193,15 +190,15 @@ public class siteswapPattern extends mhnPattern {
             throw new JuggleExceptionUser(MessageFormat.format(template, arguments));
         }
 
-        // Need to use tree to fill in mhnPattern internal variables:
+        // Need to use tree to fill in MHNPattern internal variables:
         /*
         protected int numjugglers;
         protected int numpaths;
         protected int period;
         protected int max_occupancy;
-        protected mhnThrow[][][][] th;
-        protected mhnHands hands = null;
-        protected mhnBody bodies = null;
+        protected MHNThrow[][][][] th;
+        protected MHNHands hands = null;
+        protected MHNBody bodies = null;
         protected int max_throw;
         protected int indexes;
         protected Vector symmetry = null;
@@ -232,7 +229,7 @@ public class siteswapPattern extends mhnPattern {
             throw new JuggleExceptionUser(errorstrings.getString("Error_siteswap_bad_average"));
         this.numpaths = tree.throw_sum / tree.beats;
         this.indexes = this.max_throw + this.period + 1;
-        this.th = new mhnThrow[numjugglers][2][indexes][max_occupancy];
+        this.th = new MHNThrow[numjugglers][2][indexes][max_occupancy];
 
         /*
         System.out.println("period = "+period+", numpaths = "+numpaths+", max_throw = "+
@@ -242,12 +239,12 @@ public class siteswapPattern extends mhnPattern {
         doSecondPass(tree, false, 0);
 
         // Finally, add pattern symmetries
-        addSymmetry(new mhnSymmetry(mhnSymmetry.TYPE_DELAY, numjugglers, null, period));
+        addSymmetry(new MHNSymmetry(MHNSymmetry.TYPE_DELAY, numjugglers, null, period));
         if (tree.switchrepeat) {    // know that tree is of type Pattern
             StringBuffer sb = new StringBuffer();
             for (int i = 1; i <= numjugglers; i++)
                 sb.append("("+i+","+i+"*)");
-            addSymmetry(new mhnSymmetry(mhnSymmetry.TYPE_SWITCHDELAY, numjugglers, sb.toString(), period/2));
+            addSymmetry(new MHNSymmetry(MHNSymmetry.TYPE_SWITCHDELAY, numjugglers, sb.toString(), period/2));
         }
 
         // Random error check, not sure where this should go
@@ -541,7 +538,7 @@ public class siteswapPattern extends mhnPattern {
     }
 
     // Second pass through the tree:
-    // 1)  Fill in the th[] array with mhnThrow objects
+    // 1)  Fill in the th[] array with MHNThrow objects
     protected void doSecondPass(SiteswapTreeItem sti, boolean switchhands, int beatoffset) throws JuggleExceptionUser {
         SiteswapTreeItem child = null;
 
@@ -604,7 +601,7 @@ public class siteswapPattern extends mhnPattern {
                         if (dest_juggler > getNumberOfJugglers())
                             dest_juggler = 1 + (dest_juggler-1) % getNumberOfJugglers();
 
-                        mhnThrow t = new mhnThrow(child.source_juggler, source_hand, index, i,
+                        MHNThrow t = new MHNThrow(child.source_juggler, source_hand, index, i,
                                           dest_juggler, dest_hand, index+child.value, -1, mod);
                         if (hands != null) {
                             int idx = index;

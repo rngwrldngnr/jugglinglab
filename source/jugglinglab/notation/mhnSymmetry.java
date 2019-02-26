@@ -1,4 +1,4 @@
-// mhnSymmetry.java
+// MHNSymmetry.java
 //
 // Copyright 2018 by Jack Boyce (jboyce@gmail.com) and others
 
@@ -25,7 +25,7 @@ package jugglinglab.notation;
 import jugglinglab.util.*;
 
 
-public class mhnSymmetry {
+public class MHNSymmetry {
     int         type;
     int         numjugglers;
     Permutation jugglerperm = null;
@@ -36,13 +36,13 @@ public class mhnSymmetry {
     static final public int TYPE_SWITCHDELAY = 3;
 
 
-    public mhnSymmetry(int type, int numjugglers, String jugperm, int delay) throws JuggleExceptionUser {
+    public MHNSymmetry(int type, int numjugglers, String jugperm, int delay) throws JuggleExceptionUser {
         setType(type);
         setJugglerPerm(numjugglers, jugperm);
         setDelay(delay);
     }
 
-    public int getType()        { return type; }
+    public int getType()                { return type; }
     protected void setType(int type)    { this.type = type; }
     public int getNumberOfJugglers()    { return numjugglers; }
     public Permutation getJugglerPerm() { return jugglerperm; }
@@ -57,6 +57,6 @@ public class mhnSymmetry {
             throw new JuggleExceptionUser(je.getMessage());
         }
     }
-    public int getDelay()       { return delay; }
+    public int getDelay()               { return delay; }
     protected void setDelay(int del)    { this.delay = del; }
 }

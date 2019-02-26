@@ -1,6 +1,6 @@
-// NotationGUI.java
+// NotationPanel.java
 //
-// Copyright 2018 by Jack Boyce (jboyce@gmail.com) and others
+// Copyright 2019 by Jack Boyce (jboyce@gmail.com) and others
 
 /*
     This file is part of Juggling Lab.
@@ -20,7 +20,7 @@
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-package jugglinglab.notation;
+package jugglinglab.core;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -29,20 +29,17 @@ import java.text.MessageFormat;
 import javax.swing.*;
 import javax.swing.event.*;
 
-import jugglinglab.core.*;
 import jugglinglab.generator.*;
 import jugglinglab.jml.JMLPattern;
+import jugglinglab.notation.*;
 import jugglinglab.util.*;
 import jugglinglab.view.View;
 
 // This class represents the entire contents of the ApplicationWindow frame.
 // For a given notation type it creates a tabbed pane with a notation entry
-// panel in one tab, and a generator in the other tab.
-//
-// Currently only a single notation (siteswap) is included with Juggling Lab
-// so the notation menu is suppressed.
+// panel in one tab, and a generator (if available) in the other tab.
 
-public class NotationGUI extends JPanel implements ActionListener {
+public class NotationPanel extends JPanel implements ActionListener {
     static final ResourceBundle guistrings = jugglinglab.JugglingLab.guistrings;
     static final ResourceBundle errorstrings = jugglinglab.JugglingLab.errorstrings;
 
@@ -62,11 +59,11 @@ public class NotationGUI extends JPanel implements ActionListener {
     protected static final double max_time = 15.0;
 
 
-    public NotationGUI(JFrame parent) {
+    public NotationPanel(JFrame parent) {
         this(parent, null, null, false);
     }
 
-    public NotationGUI(JFrame p, View v, PatternList pl, boolean patlisttab) {
+    public NotationPanel(JFrame p, View v, PatternList pl, boolean patlisttab) {
         this.parent = p;
         this.animtarget = v;
         this.patlist = pl;
@@ -131,12 +128,12 @@ public class NotationGUI extends JPanel implements ActionListener {
         if (num != Notation.NOTATION_NONE) {
             try {
                 not = Notation.getNotation(Notation.builtinNotations[num-1]);
-                Class<?> nc = Class.forName("jugglinglab.notation."+Notation.builtinNotations[num-1].toLowerCase()+"NotationControl");
+                Class<?> nc = Class.forName("jugglinglab.notation."+Notation.builtinNotations[num-1]+"NotationControl");
                 control = (NotationControl)(nc.newInstance());
             } catch (JuggleExceptionUser je) {
                 throw new JuggleExceptionInternal("Could not create notation \""+Notation.builtinNotations[num-1]+"\"");
             } catch (ClassNotFoundException cnfe) {
-                throw new JuggleExceptionUser("Could not find "+Notation.builtinNotations[num-1].toLowerCase()+"NotationControl class");
+                throw new JuggleExceptionUser("Could not find "+Notation.builtinNotations[num-1]+"NotationControl class");
             } catch (IllegalAccessException iae) {
             } catch (InstantiationException ie) {
             }
@@ -189,7 +186,7 @@ public class NotationGUI extends JPanel implements ActionListener {
                     } catch (JuggleExceptionUser je) {
                         if (jaw2 != null)
                             jaw2.dispose();
-                        new ErrorDialog(NotationGUI.this, je.getMessage());
+                        new ErrorDialog(NotationPanel.this, je.getMessage());
                     } catch (Exception e) {
                         if (jaw2 != null)
                             jaw2.dispose();
@@ -256,7 +253,7 @@ public class NotationGUI extends JPanel implements ActionListener {
                                 } catch (JuggleExceptionUser ex) {
                                     if (pw != null)
                                         pw.dispose();
-                                    new ErrorDialog(NotationGUI.this, ex.getMessage());
+                                    new ErrorDialog(NotationPanel.this, ex.getMessage());
                                 } catch (Exception e) {
                                     if (pw != null)
                                         pw.dispose();

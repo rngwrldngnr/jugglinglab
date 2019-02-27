@@ -50,6 +50,9 @@ public abstract class Notation {
         if (hash == null)
             hash = new Hashtable<String, Notation>();
 
+        // make sure the notation name is capitalized
+        name = name.substring(0,1).toUpperCase() + name.substring(1);
+
         Notation not = hash.get(name);
         if (not == null) {
             Notation newnot = null;

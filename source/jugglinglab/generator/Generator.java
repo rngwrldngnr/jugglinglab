@@ -36,14 +36,17 @@ public abstract class Generator {
     static final ResourceBundle errorstrings = jugglinglab.JugglingLab.errorstrings;
 
     // The built-in generators
-    public static final String[] builtinGenerators = { "siteswap" };
+    public static final String[] builtinGenerators = { "Siteswap" };
 
     // This is a factory to create Generators from names.  Note the
     // naming convention.
     public static Generator getGenerator(String name) {
+        // make sure the notation name is capitalized
+        name = name.substring(0,1).toUpperCase() + name.substring(1);
+
         try {
             Object obj = Class.forName("jugglinglab.generator."+
-                                       name.toLowerCase()+"Generator").newInstance();
+                                       name+"Generator").newInstance();
             if (!(obj instanceof Generator)) {
                 return null;
                 // throw new JuggleExceptionUser("Generator type '"+name+"' doesn't work");

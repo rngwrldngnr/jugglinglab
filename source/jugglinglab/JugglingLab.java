@@ -268,7 +268,7 @@ public class JugglingLab {
                 PrintStream ps = System.out;
                 if (outpath != null)
                     ps = new PrintStream(outpath.toFile());
-                siteswapGenerator.runGeneratorCLI(genargs, new GeneratorTarget(ps));
+                SiteswapGenerator.runGeneratorCLI(genargs, new GeneratorTarget(ps));
             } catch (FileNotFoundException fnfe) {
                 System.out.println("Error: problem writing to file path " + outpath.toString());
             }

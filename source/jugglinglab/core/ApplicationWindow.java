@@ -43,14 +43,20 @@ public class ApplicationWindow extends JFrame implements ActionListener {
     public ApplicationWindow(String title) throws JuggleExceptionUser,
                                         JuggleExceptionInternal {
         super(title);
-        NotationPanel ng = new NotationPanel(this);
+
+        NotationPanel np = new NotationPanel(this);
+        // start with notation set to Siteswap
+        np.setNotation(Notation.NOTATION_SITESWAP);
+        np.setDoubleBuffered(true);
 
         JMenuBar mb = new JMenuBar();
         JMenu filemenu = createFileMenu();
         mb.add(filemenu);
-        JMenu notationmenu = ng.createNotationMenu();
-        if (Notation.builtinNotations.length > 1)
+        if (Notation.builtinNotations.length > 1) {
+            JMenu notationmenu = np.createNotationMenu();
+            notationmenu.getItem(Notation.NOTATION_SITESWAP - 1).setSelected(true);
             mb.add(notationmenu);
+        }
         JMenu helpmenu = createHelpMenu();
         if (helpmenu != null)
             mb.add(helpmenu);
@@ -60,16 +66,12 @@ public class ApplicationWindow extends JFrame implements ActionListener {
         PlatformSpecific.getPlatformSpecific().setupPlatform();
 
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-        ng.setDoubleBuffered(true);
         this.setBackground(new Color(0.9f, 0.9f, 0.9f));
-        setContentPane(ng);
-        ng.setNotation(Notation.NOTATION_SITESWAP);
+        setContentPane(np);
 
         Locale loc = JLLocale.getLocale();
         this.applyComponentOrientation(ComponentOrientation.getOrientation(loc));
 
-        // make siteswap notation the default
-        notationmenu.getItem(Notation.NOTATION_SITESWAP - 1).setSelected(true);
         pack();
         setResizable(false);
         setLocation(100, 50);
